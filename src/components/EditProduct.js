@@ -1,19 +1,37 @@
-import React, {useState} from 'react';
-import {useDispatch} from 'react-redux';
-import {update} from "../features/productSlice";
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import { getProducts, productSelectors, updateProduct } from '../features/productSlice.js';
+import {useParams, useNavigate} from "react-router-dom";
+
 
 const EditProduct = () => {
   const [title, setTitle]=useState("");
   const [price, setPrice]=useState("");
   const dispatch=useDispatch();
+  const navigate=useNavigate();
+  const {id}=useParams();
 
-  const updateProduct=(e) => {
-  	e.preventDefault();
-  	dispatch(update({title, price}));
-  } 
+  const product=useSelector((state) => productSelectors.selectById(state,id));
+
+  useEffect(() =>{
+	dispatch(getProducts)
+  },[dispatch]);
+
+  useEffect(() =>{
+	if(product){
+		setTitle(product.title);
+		setPrice(product.price);
+	}
+  },[product]);
+
+  const handleUpdate=async (e) =>{
+	e.preventDefault();
+	await dispatch(updateProduct({id, title, price}));
+	navigate("/");
+  }
   return (
     <div>
-       <form onSubmit={updateProduct} className="box mt-5">
+       <form onSubmit={handleUpdate} className="box mt-5">
        		<div className="field">
 				<label className="label">Title</label>
 				<input type="text" className="input" placeholder="Title" value={title} onChange={(e) => setTitle(e.target.value)}/>
